@@ -1,8 +1,30 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 )
+
+func recoverImagesFromFile(fileName string) {
+	log.Printf("Reading file %s into memory... ", fileName)
+	fileData, err := ioutil.ReadFile(fileName)
+	checkError(err)
+	log.Printf("Done (read %d bytes)\n", len(fileData))
+
+	imageData, err := recoverImages(fileData)
+	checkError(err)
+
+	err = os.Mkdir("recovered", 0777)
+	checkError(err)
+
+	for i := 0; i < len(imageData); i++ {
+		path := fmt.Sprintf("recovered/image_%d.jpg", i)
+		err = ioutil.WriteFile(path, imageData[i], 0777)
+		checkError(err)
+	}
+}
 
 // recoverImage attempts to find JPEG files embedded in a byte slice, by looking for
 // the FFD8 starting marker and reading up to an FFD9 ending marking if it exists
